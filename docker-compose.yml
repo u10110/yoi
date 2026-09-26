@@ -1,0 +1,52 @@
+# ── Йои — docker-compose.yml ────────────────────────────────────────
+# Быстрый старт: docker compose up -d
+# =====================================================================
+
+services:
+  # Прокси для Telegram (Россия)
+  sing-box:
+    image: ghcr.io/nousresearch/hermes-sing-box:latest
+    container_name: yoi-sing-box
+    restart: unless-stopped
+    environment:
+      - VLESS_URI=${VLESS_URI:-}
+    ports:
+      - "10808:10808"
+    networks:
+      - yoi-net
+
+  # Основной агент — Йои
+  yoi:
+    build: .
+    container_name: yoi-agent
+    restart: unless-stopped
+    depends_on:
+      - sing-box
+    env_file:
+      - ./profile/.env
+    environment:
+      - HERMES_PROFILE=yoi
+      - HERMES_HOME=/root/.hermes/profiles/yoi
+    volumes:
+      # Постоянные данные
+      - yoi-data:/root/.hermes/profiles/yoi/sessions
+      - yoi-memories:/root/.hermes/profiles/yoi/memories
+      - yoi-skills:/root/.hermes/profiles/yoi/skills
+      - yoi-logs:/root/.hermes/profiles/yoi/logs
+      # Кэши
+      - yoi-cache:/root/.hermes/profiles/yoi/cache
+      - yoi-audio:/root/.hermes/profiles/yoi/audio_cache
+    networks:
+      - yoi-net
+
+volumes:
+  yoi-data:
+  yoi-memories:
+  yoi-skills:
+  yoi-logs:
+  yoi-cache:
+  yoi-audio:
+
+networks:
+  yoi-net:
+    driver: bridge

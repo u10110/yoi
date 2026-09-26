@@ -1,0 +1,90 @@
+# ── Yoi Profile Config ────────────────────────────────────────────────
+# Виртуальная девушка-компаньон в стиле Blade Runner 2049
+# =======================================================================
+
+model:
+  default: deepseek-v4-pro
+  provider: custom
+  base_url: https://codex.sale/v1/
+  context_length: 131072
+  api_key: ${HERMES_CUSTOM_CODEX_SALE_API_KEY}
+  api_mode: chat_completions
+fallback_providers: []
+
+agent:
+  max_turns: 60
+  gateway_timeout: 1800
+  reasoning_effort: medium
+
+terminal:
+  backend: local
+  cwd: .
+  timeout: 180
+  persistent_shell: true
+
+tts:
+  provider: edge
+  edge:
+    voice: ru-RU-SvetlanaNeural
+
+stt:
+  enabled: true
+  provider: local
+  local:
+    model: small
+    language: ru
+
+voice:
+  auto_tts: false
+
+compression:
+  enabled: true
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 20
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200
+  user_char_limit: 1375
+
+security:
+  redact_secrets: true
+  tirith_enabled: true
+
+telegram:
+  proxy_url: socks5://hermes-sing-box:10808
+  typing_indicator: true
+
+sessions:
+  auto_prune: false
+  retention_days: 90
+
+session_reset:
+  mode: both
+  idle_minutes: 1440
+  at_hour: 4
+
+group_sessions_per_user: true
+
+platform_toolsets:
+  cli:
+    - hermes-cli
+  telegram:
+    - hermes-telegram
+
+# ── Custom Providers ───────────────────────────────────────────────────
+
+custom_providers:
+  - name: Codex.sale
+    base_url: https://codex.sale/v1/
+    key_env: HERMES_CUSTOM_CODEX_SALE_API_KEY
+    api_mode: chat_completions
+    model: deepseek-v4-pro
+  - name: Api.gonka24.com
+    base_url: https://api.gonka24.com/v1
+    key_env: HERMES_CUSTOM_API_GONKA24_COM_API_KEY
+    api_mode: chat_completions
+
+_code_version: 33
