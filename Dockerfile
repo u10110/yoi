@@ -1,38 +1,22 @@
-# Yoi — Hermes Agent with companion persona
-# Blade Runner 2049 aesthetic virtual companion
-FROM ubuntu:22.04
+# syntax=docker/dockerfile:1
+FROM nikolaik/python-nodejs:python3.11-nodejs20
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=ru_RU.UTF-8 \
-    LANGUAGE=ru_RU:ru \
-    LC_ALL=ru_RU.UTF-8
+ENV PYTHONUNBUFFERED=1 \
+    HERMES_HOME=/root/.hermes
 
-# System deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates git python3 python3-pip python3-venv \
-    locales tmux ffmpeg espeak-ng \
-    && locale-gen ru_RU.UTF-8 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl git tmux ca-certificates unzip ffmpeg \
+    fonts-liberation fonts-noto-color-emoji fontconfig \
+ && rm -rf /var/lib/apt/lists/*
 
-# Install Hermes
-RUN curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+RUN curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash \
+ && /usr/local/lib/hermes-agent/venv/bin/python3 -m pip install --no-cache-dir \
+      faster-whisper edge-tts python-telegram-bot
 
-# Install Russian STT (faster-whisper)
-RUN /usr/local/lib/hermes-agent/venv/bin/pip install faster-whisper
-
-# Create yoi profile
-RUN hermes profile create yoi --clone-from default 2>/dev/null || true
-
-# Copy profile files
-COPY profile/SOUL.md /root/.hermes/profiles/yoi/SOUL.md
+# Yoi profile
 COPY profile/config.yaml /root/.hermes/profiles/yoi/config.yaml
-COPY profile/.env.template /root/.hermes/profiles/yoi/.env.template
-COPY scripts/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-# Install skills needed by yoi
-RUN hermes -p yoi skills install hermes-agent 2>/dev/null || true
+COPY profile/SOUL.md /root/.hermes/profiles/yoi/SOUL.md
 
 WORKDIR /root
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash", "-lc", "hermes --profile yoi gateway run"]
