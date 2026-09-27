@@ -6,6 +6,8 @@ services:
   yoi:
     build: .
     container_name: yoi-agent
+    extra_hosts:
+      - host.docker.internal:host-gateway
     restart: unless-stopped
     env_file:
       - ./profile/.env
