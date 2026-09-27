@@ -9,14 +9,14 @@
 git clone git@github.com:u10110/yoi.git
 cd yoi
 
-# 1. Создай .env и конфиг прокси
+# 1. Создай .env
 make setup
 
-# 2. Отредактируй:
-#    profile/.env — TELEGRAM_BOT_TOKEN + ключи API
-#    sing-box/config.json — данные VLESS-прокси
+# 2. Отредактируй profile/.env — TELEGRAM_BOT_TOKEN + ключи API
 
-# 3. Запуск
+# 3. Прокси должен быть запущен локально (socks5://localhost:10808)
+
+# 4. Запуск
 make up
 make logs
 ```
@@ -25,80 +25,56 @@ make logs
 
 ```
 yoi/
-├── docker-compose.yml       # yoi + sing-box прокси
-├── Dockerfile                # Сборка Hermes с профилем yoi
-├── Makefile                  # make up/down/logs/shell
+├── docker-compose.yml       # только агент (без прокси)
+├── Dockerfile               # сборка Hermes + профиль yoi
+├── Makefile                 # make up/down/logs
 ├── profile/
-│   ├── SOUL.md              # Личность Йои
-│   ├── config.yaml          # Настройки агента
-│   └── .env.template        # Шаблон для токенов
-├── sing-box/
-│   ├── Dockerfile           # Сборка sing-box из бинарника
-│   ├── config.template.json # Шаблон VLESS-конфига
-│   └── config.json          # Твой конфиг (не коммитить!)
+│   ├── SOUL.md             # личность Йои (Blade Runner 2049)
+│   ├── config.yaml         # модель Codex.sale, TTS Edge, STT Whisper
+│   └── .env.template       # шаблон для токенов
 └── scripts/
-    └── entrypoint.sh        # Автозапуск гейтвея
+    └── entrypoint.sh
 ```
 
-## Что нужно заполнить
+## Что нужно
 
-### `profile/.env`
-
-```bash
-TELEGRAM_BOT_TOKEN=8660210938:ТВОЙ_ТОКЕН_БОТА
-TELEGRAM_ALLOWED_USERS=ТВОЙ_TG_ID
-HERMES_CUSTOM_CODEX_SALE_API_KEY=sk-ТВОЙ_КЛЮЧ
-```
-
-### `sing-box/config.json`
-
-Замени `__SERVER__`, `__UUID__`, `__SNI__`, `__PBK__`, `__SID__` на значения из твоего VLESS URI.
-
-Или автоматически:
-```bash
-make proxy-config URI='vless://uuid@host:443?...'
-```
+| Компонент | Где взять |
+|-----------|----------|
+| Telegram Bot | @BotFather → `TELEGRAM_BOT_TOKEN` |
+| TG ID | @userinfobot → `TELEGRAM_ALLOWED_USERS` |
+| Codex.sale ключ | codex.sale → `HERMES_CUSTOM_CODEX_SALE_API_KEY` |
+| VLESS прокси | уже запущен локально, порт 10808 |
 
 ## Команды
 
 | Команда | Что делает |
 |---------|-----------|
-| `make setup` | Создать .env и config.json из шаблонов |
 | `make up` | Запустить |
 | `make down` | Остановить |
 | `make logs` | Логи |
 | `make shell` | Зайти в контейнер |
-| `make build` | Пересобрать образы |
-| `make restart` | Перезапустить |
-| `make clean` | Удалить всё (включая память) |
+| `make build` | Пересобрать |
+| `make clean` | Удалить всё |
 
-## Как это работает
+## Как работает
 
 ```
-┌─────────────────────────────────────┐
-│  Telegram  ←→  sing-box (VLESS)     │
-│                  ↓                   │
-│            Hermes Gateway            │
-│           (профиль yoi)              │
-│                  ↓                   │
-│    SOUL.md  →  личность Йои         │
-│    Edge TTS  →  голос               │
-│    Whisper   →  распознавание речи  │
-│    Память    →  помнит тебя         │
-└─────────────────────────────────────┘
+Telegram ← VLESS-прокси (хост:10808) → Hermes Gateway (yoi)
+                                            ↓
+                              SOUL.md → личность Йои
+                              Edge TTS → голос (Светлана)
+                              Whisper → распознавание речи
+                              Память → помнит тебя
 ```
+
+## Голос
+
+Сейчас **Edge TTS** (ru-RU-SvetlanaNeural) — бесплатно, без GPU.  
+Для XTTS v2 локально (4+ GB VRAM) — добавить отдельный сервис.
 
 ## Железо
 
-- CPU: 2 ядра
-- RAM: 2 GB
-- Диск: 10 GB
-- GPU: не требуется
-
-## Улучшение голоса
-
-Сейчас используется **Edge TTS** (ru-RU-SvetlanaNeural) — бесплатно, без GPU.  
-Для XTTS v2 на своей машине (4+ GB VRAM) добавь отдельный сервис в docker-compose.
+CPU 2 ядра, RAM 2 GB, диск 10 GB. GPU не требуется.
 
 ## Лицензия
 
