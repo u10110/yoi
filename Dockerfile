@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM nikolaik/python-nodejs:python3.11-nodejs20
 
 ENV PYTHONUNBUFFERED=1 \
