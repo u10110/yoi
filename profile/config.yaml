@@ -99,7 +99,7 @@ browser:
   allow_private_urls: false
   engine: auto
   auto_local_for_private_urls: true
-  cdp_url: http://aiwithdev-max-browser:9223
+  cdp_url: ''
   dialog_policy: must_respond
   dialog_timeout_s: 300
   camofox:
