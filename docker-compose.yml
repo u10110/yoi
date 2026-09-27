@@ -1,6 +1,5 @@
 # ── Йои — docker-compose.yml ────────────────────────────────────────
 # Быстрый старт: docker compose up -d
-# Прокси уже должен быть запущен локально на хосте
 # =====================================================================
 
 services:
@@ -13,8 +12,6 @@ services:
     environment:
       - HERMES_PROFILE=yoi
       - HERMES_HOME=/root/.hermes/profiles/yoi
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - yoi-data:/root/.hermes/profiles/yoi/sessions
       - yoi-memories:/root/.hermes/profiles/yoi/memories

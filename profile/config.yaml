@@ -54,7 +54,6 @@ security:
   tirith_enabled: true
 
 telegram:
-  proxy_url: socks5://host.docker.internal:10808
   typing_indicator: true
 
 sessions:
