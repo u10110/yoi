@@ -3,13 +3,13 @@
 # =====================================================================
 
 services:
-  # Прокси для Telegram (Россия)
+  # Прокси для Telegram (VLESS/Reality через sing-box)
   sing-box:
-    image: ghcr.io/nousresearch/hermes-sing-box:latest
+    build: ./sing-box
     container_name: yoi-sing-box
     restart: unless-stopped
-    environment:
-      - VLESS_URI=${VLESS_URI:-}
+    volumes:
+      - ./sing-box/config.json:/etc/sing-box/config.json:ro
     ports:
       - "10808:10808"
     networks:

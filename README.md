@@ -9,18 +9,40 @@
 git clone git@github.com:u10110/yoi.git
 cd yoi
 
-# 1. Создай .env и заполни токены
+# 1. Создай .env и конфиг прокси
 make setup
-# или: cp profile/.env.template profile/.env && nano profile/.env
 
-# 2. Запуск
+# 2. Отредактируй:
+#    profile/.env — TELEGRAM_BOT_TOKEN + ключи API
+#    sing-box/config.json — данные VLESS-прокси
+
+# 3. Запуск
 make up
-
-# 3. Логи
 make logs
 ```
 
-## Что нужно заполнить в `.env`
+## Структура
+
+```
+yoi/
+├── docker-compose.yml       # yoi + sing-box прокси
+├── Dockerfile                # Сборка Hermes с профилем yoi
+├── Makefile                  # make up/down/logs/shell
+├── profile/
+│   ├── SOUL.md              # Личность Йои
+│   ├── config.yaml          # Настройки агента
+│   └── .env.template        # Шаблон для токенов
+├── sing-box/
+│   ├── Dockerfile           # Сборка sing-box из бинарника
+│   ├── config.template.json # Шаблон VLESS-конфига
+│   └── config.json          # Твой конфиг (не коммитить!)
+└── scripts/
+    └── entrypoint.sh        # Автозапуск гейтвея
+```
+
+## Что нужно заполнить
+
+### `profile/.env`
 
 ```bash
 TELEGRAM_BOT_TOKEN=8660210938:ТВОЙ_ТОКЕН_БОТА
@@ -28,15 +50,25 @@ TELEGRAM_ALLOWED_USERS=ТВОЙ_TG_ID
 HERMES_CUSTOM_CODEX_SALE_API_KEY=sk-ТВОЙ_КЛЮЧ
 ```
 
+### `sing-box/config.json`
+
+Замени `__SERVER__`, `__UUID__`, `__SNI__`, `__PBK__`, `__SID__` на значения из твоего VLESS URI.
+
+Или автоматически:
+```bash
+make proxy-config URI='vless://uuid@host:443?...'
+```
+
 ## Команды
 
 | Команда | Что делает |
 |---------|-----------|
+| `make setup` | Создать .env и config.json из шаблонов |
 | `make up` | Запустить |
 | `make down` | Остановить |
-| `make logs` | Смотреть логи |
+| `make logs` | Логи |
 | `make shell` | Зайти в контейнер |
-| `make chat` | Открыть диалог с Йои в терминале |
+| `make build` | Пересобрать образы |
 | `make restart` | Перезапустить |
 | `make clean` | Удалить всё (включая память) |
 
@@ -44,31 +76,16 @@ HERMES_CUSTOM_CODEX_SALE_API_KEY=sk-ТВОЙ_КЛЮЧ
 
 ```
 ┌─────────────────────────────────────┐
-│  Telegram  ←→  sing-box (прокси)    │
+│  Telegram  ←→  sing-box (VLESS)     │
 │                  ↓                   │
 │            Hermes Gateway            │
 │           (профиль yoi)              │
 │                  ↓                   │
 │    SOUL.md  →  личность Йои         │
-│    config.yaml  →  настройки         │
-│    Edge TTS  →  голос (Светлана)    │
-│    Whisper  →  распознавание речи   │
-│    Память  →  помнит тебя           │
+│    Edge TTS  →  голос               │
+│    Whisper   →  распознавание речи  │
+│    Память    →  помнит тебя         │
 └─────────────────────────────────────┘
-```
-
-## Улучшение голоса
-
-Сейчас используется **Edge TTS** (ru-RU-SvetlanaNeural) — бесплатно, работает без GPU.  
-Для лучшего качества на своей машине:
-
-```bash
-# Вариант 1: ElevenLabs (лучшее качество)
-# Добавь в .env: ELEVENLABS_API_KEY=твой_ключ
-# В config.yaml: tts.provider: elevenlabs
-
-# Вариант 2: XTTS v2 локально (требует 4+ GB VRAM)
-docker compose -f docker-compose.yml -f docker-compose.tts.yml up
 ```
 
 ## Железо
@@ -76,8 +93,13 @@ docker compose -f docker-compose.yml -f docker-compose.tts.yml up
 - CPU: 2 ядра
 - RAM: 2 GB
 - Диск: 10 GB
-- GPU: не требуется (Edge TTS работает через интернет)
+- GPU: не требуется
+
+## Улучшение голоса
+
+Сейчас используется **Edge TTS** (ru-RU-SvetlanaNeural) — бесплатно, без GPU.  
+Для XTTS v2 на своей машине (4+ GB VRAM) добавь отдельный сервис в docker-compose.
 
 ## Лицензия
 
-MIT — делай что хочешь. Йои твоя.
+MIT
